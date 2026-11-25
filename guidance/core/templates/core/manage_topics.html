@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage My Topics</title>
+</head>
+<body>
+    <h1>Manage My Topics</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <h2>Add a Topic</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Topic</button>
+    </form>
+
+    <h2>My Current Topics</h2>
+
+    {% if user_topics %}
+        <ul>
+            {% for item in user_topics %}
+                <li>
+                    <strong>{{ item.topic.name }}</strong>
+                    — {{ item.get_topic_type_display }}
+                    — {{ item.get_experience_level_display }}
+
+                    <form
+                        method="post"
+                        action="{% url 'remove_topic' item.id %}"
+                        style="display: inline;"
+                    >
+                        {% csrf_token %}
+                        <button type="submit">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't added any topics yet.</p>
+    {% endif %}
+
+    <p><a href="{% url 'my_profile' %}">Back to my profile</a></p>
+    <p><a href="{% url 'my_matches' %}">View my matches</a></p>
+</body>
+</html>

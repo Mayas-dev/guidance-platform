@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Received Offers</title>
+</head>
+<body>
+    <h1>Offers for: {{ guidance_request.title }}</h1>
+
+    {% if offers %}
+        {% for offer in offers %}
+            <article>
+                <h2>
+                    Offer from
+                    <a href="{% url 'user_profile' offer.helper.username %}">
+                        {{ offer.helper.username }}
+                    </a>
+                </h2>
+
+                <p>
+                    <strong>Message:</strong>
+                    {{ offer.message|default:"No message provided."|linebreaks }}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    {{ offer.get_status_display }}
+                </p>
+                
+                {% if guidance_request.status == "OPEN" and offer.status == "PENDING" %}
+                  <form method="post"
+                      action="{% url 'respond_to_offer' guidance_request.pk offer.pk %}">
+                      {% csrf_token %}
+                    <button type="submit" name="action" value="accept">
+                      Accept
+                    </button>
+                    <button type="submit" name="action" value="decline">
+                      Decline
+                    </button>
+                  </form>
+                {% endif %}
+
+                <p>
+                    <strong>Submitted:</strong>
+                    {{ offer.created_at }}
+                </p>
+            </article>
+            <hr>
+        {% endfor %}
+    {% else %}
+        <p>No one has offered to help with this request yet.</p>
+    {% endif %}
+
+    <p>
+        <a href="{% url 'request_detail' guidance_request.pk %}">
+            Back to request
+        </a>
+    </p>
+</body>
+</html>

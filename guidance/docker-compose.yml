@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: &{guidance_db}
+      POSTGRES_USER: &{guidance_user}
+      POSTGRES_PASSWORD: &{guidance_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - fastembed_cache:/app/model_cache
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_NAME: ${guidance_db}
+      DATABASE_USER: ${guidance_user}
+      DATABASE_PASSWORD: ${guidance_password}
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+  fastembed_cache:

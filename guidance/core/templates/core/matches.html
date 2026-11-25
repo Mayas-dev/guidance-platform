@@ -1,0 +1,111 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Guidance Matches</title>
+</head>
+<body>
+    <h1>Potential Guidance Matches</h1>
+
+    
+    <section>
+        <h2>Reciprocal Guidance Matches</h2>
+
+        {% if matches %}
+            {% for match in matches %}
+                <section>
+                    <h3>
+                        <a href="{% url 'user_profile' username=match.user.username %}">
+                            {{ match.user.username }}
+                        </a>
+                    </h3>
+
+                    <h4>They can guide you on:</h4>
+                    {% if match.they_can_guide %}
+                        <ul>
+                            {% for topic in match.they_can_guide %}
+                                <li>{{ topic.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No matching topics.</p>
+                    {% endif %}
+
+                    <h4>You can guide them on:</h4>
+                    {% if match.you_can_guide %}
+                        <ul>
+                            {% for topic in match.you_can_guide %}
+                                <li>{{ topic.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No matching topics.</p>
+                    {% endif %}
+                </section>
+                <hr>
+            {% endfor %}
+        {% else %}
+            <p>No reciprocal guidance matches found.</p>
+        {% endif %}
+    </section>
+
+    <!-- Semantic recommendations -->
+    <section>
+        <h2>AI-Supported Recommendations</h2>
+
+        <p>
+            These recommendations use semantic similarity to find
+            potential helpers based on the content of your guidance requests.
+        </p>
+
+        {% if semantic_matches %}
+            {% for request_group in semantic_matches %}
+                <section>
+                    <h3>
+                        Recommendations for:
+                        {{ request_group.guidance_request.title }}
+                    </h3>
+
+                    {% if request_group.matches %}
+                        {% for recommendation in request_group.matches %}
+                            <article>
+                                <h4>
+                                    <a href="{% url 'user_profile' username=recommendation.user.username %}">
+                                        {{ recommendation.user.username }}
+                                    </a>
+                                </h4>
+
+                                <p>
+                                    Can guide you on:
+                                    {{ recommendation.topic.name }}
+                                </p>
+
+                                <p>
+                                    Experience level:
+                                    {{ recommendation.experience_level|title }}
+                                </p>
+
+                                <p>
+                                    Similarity score:
+                                    {{ recommendation.similarity|floatformat:3 }}
+                                </p>
+                            </article>
+                            <hr>
+                        {% endfor %}
+                    {% else %}
+                        <p>No semantic recommendations found for this request.</p>
+                    {% endif %}
+                </section>
+            {% endfor %}
+        {% else %}
+            <p>
+                You currently have no open guidance requests
+                to generate recommendations for.
+            </p>
+        {% endif %}
+    </section>
+
+</body>
+</html>

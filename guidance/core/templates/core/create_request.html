@@ -1,0 +1,20 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create a Guidance Request</title>
+</head>
+<body>
+    <h1>Ask for Guidance</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Submit Request</button>
+    </form>
+
+    <p><a href="{% url 'my_profile' %}">Back to my profile</a></p>
+</body>
+</html>

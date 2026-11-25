@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Browse Open Requests</title>
+</head>
+<body>
+    <h1>Open Guidance Requests</h1>
+    <p>
+        <a href="{% url 'my_requests' %}">My Requests</a> |
+        <a href="{% url 'create_request' %}">Ask for Guidance</a>
+    </p>
+
+    {% if open_requests %}
+        {% for guidance_request in open_requests %}
+            <article>
+                <h2><a href="{% url 'request_detail' guidance_request.pk %}">{{ guidance_request.title }}</a></h2>
+
+                <p>
+                    <strong>Topic:</strong>
+                    {{ guidance_request.topic.name }}
+                </p>
+
+                <p>
+                    <strong>Posted by:</strong>
+                    {{ guidance_request.user.username }}
+                </p>
+
+                <p>{{ guidance_request.description|truncatewords:40 }}</p>
+
+                <p>
+                    <strong>Posted:</strong>
+                    {{ guidance_request.created_at }}
+                </p>
+            </article>
+            <hr>
+        {% endfor %}
+    {% else %}
+        <p>There are no open requests from other users right now.</p>
+    {% endif %}
+
+    <p><a href="{% url 'my_profile' %}">Back to my profile</a></p>
+</body>
+</html>

@@ -1,0 +1,33 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Offer to Help</title>
+</head>
+<body>
+    <h1>Offer to Help</h1>
+
+    <h2>{{ guidance_request.title }}</h2>
+
+    <p>
+        <strong>Topic:</strong>
+        {{ guidance_request.topic.name }}
+    </p>
+
+    <p>{{ guidance_request.description|linebreaks }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit Offer</button>
+    </form>
+
+    <p>
+        <a href="{% url 'request_detail' guidance_request.pk %}">
+            Back to request
+        </a>
+    </p>
+</body>
+</html>

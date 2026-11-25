@@ -1,0 +1,30 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Guidance Requests</title>
+</head>
+<body>
+    <h1>My Guidance Requests</h1>
+
+    <p><a href="{% url 'create_request' %}">Ask for guidance</a></p>
+
+    {% if guidance_requests %}
+        {% for guidance_request in guidance_requests %}
+            <article>
+                <h2><a href="{% url 'request_detail' guidance_request.pk %}">{{ guidance_request.title }}</a></h2>
+                <p><strong>Topic:</strong> {{ guidance_request.topic.name }}</p>
+                <p>{{ guidance_request.description }}</p>
+                <p><strong>Status:</strong> {{ guidance_request.get_status_display }}</p>
+                <p><strong>Created:</strong> {{ guidance_request.created_at }}</p>
+            </article>
+            <hr>
+        {% endfor %}
+    {% else %}
+        <p>You haven't submitted any guidance requests yet.</p>
+    {% endif %}
+
+    <p><a href="{% url 'my_profile' %}">Back to my profile</a></p>
+</body>
+</html>

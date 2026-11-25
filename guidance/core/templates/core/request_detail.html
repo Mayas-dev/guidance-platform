@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ guidance_request.title }}</title>
+</head>
+<body>
+    <h1>{{ guidance_request.title }}</h1>
+
+    <p>
+        <strong>Topic:</strong>
+        {{ guidance_request.topic.name }}
+    </p>
+
+    <p>
+        <strong>Posted by:</strong>
+        <a href="{% url 'user_profile' guidance_request.user.username %}">
+            {{ guidance_request.user.username }}
+        </a>
+    </p>
+
+    <h2>Description</h2>
+    <p>{{ guidance_request.description|linebreaks }}</p>
+
+    <p>
+        <strong>Status:</strong>
+        {{ guidance_request.get_status_display }}
+    </p>
+    
+    {% if guidance_request.user_id == request.user.id %}
+    <p>
+            <a href="{% url 'received_offers' guidance_request.pk %}">
+                 View Received Offers
+            </a>
+    </p>
+    {% endif %}
+
+    {% if guidance_request.status == "OPEN" and guidance_request.user_id != request.user.id %}
+    <p>
+        <a href="{% url 'offer_to_help' guidance_request.pk %}">
+            Offer to Help
+        </a>
+    </p>
+    {% endif %}
+
+    <p>
+        <strong>Created:</strong>
+        {{ guidance_request.created_at }}
+    </p>
+
+    <p>
+        <a href="{% url 'browse_requests' %}">Back to open requests</a>
+    </p>
+</body>
+</html>

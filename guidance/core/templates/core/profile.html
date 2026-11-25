@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ profile_user.username }}'s Profile</title>
+</head>
+<body>
+    <h1>{{ profile_user.username }}'s Profile</h1>
+
+    <h2>About</h2>
+
+    {% if profile.bio %}
+        <p>{{ profile.bio }}</p>
+    {% else %}
+        <p>This user hasn't added a bio yet.</p>
+    {% endif %}
+    {% if request.user == profile_user %}
+        <p><a href="{% url 'edit_profile' %}">Edit my profile</a></p>
+        <p><a href="{% url 'manage_topics' %}">Manage my topics</a></p>
+    {% endif %}
+    <h2>Topics They Can Guide Others On</h2>
+
+    {% if can_guide %}
+        <ul>
+            {% for item in can_guide %}
+                <li>
+                    {{ item.topic.name }}
+                    — {{ item.get_experience_level_display }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No guidance topics listed.</p>
+    {% endif %}
+
+    <h2>Topics They Want Guidance On</h2>
+
+    {% if wants_guidance %}
+        <ul>
+            {% for item in wants_guidance %}
+                <li>
+                    {{ item.topic.name }}
+                    — {{ item.get_experience_level_display }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No learning topics listed.</p>
+    {% endif %}
+
+    <p><a href="{% url 'my_matches' %}">Back to my matches</a></p>
+</body>
+</html>

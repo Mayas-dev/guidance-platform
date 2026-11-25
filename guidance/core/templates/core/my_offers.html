@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Offers</title>
+</head>
+<body>
+    <h1>My Guidance Offers</h1>
+
+    {% if offers %}
+        {% for offer in offers %}
+            <article>
+                <h2>
+                    <a href="{% url 'request_detail' offer.guidance_request.pk %}">
+                        {{ offer.guidance_request.title }}
+                    </a>
+                </h2>
+
+                <p>
+                    <strong>Request owner:</strong>
+                    <a href="{% url 'user_profile' offer.guidance_request.user.username %}">
+                        {{ offer.guidance_request.user.username }}
+                    </a>
+                </p>
+
+                <p>
+                    <strong>Topic:</strong>
+                    {{ offer.guidance_request.topic.name }}
+                </p>
+
+                <p>
+                    <strong>Your message:</strong>
+                    {{ offer.message|default:"No message provided."|linebreaks }}
+                </p>
+
+                <p>
+                    <strong>Offer status:</strong>
+                    {{ offer.get_status_display }}
+                </p>
+
+                <p>
+                    <strong>Request status:</strong>
+                    {{ offer.guidance_request.get_status_display }}
+                </p>
+            </article>
+            <hr>
+        {% endfor %}
+    {% else %}
+        <p>You haven't submitted any guidance offers yet.</p>
+    {% endif %}
+
+    <p><a href="{% url 'browse_requests' %}">Browse open requests</a></p>
+    <p><a href="{% url 'my_profile' %}">Back to my profile</a></p>
+</body>
+</html>
