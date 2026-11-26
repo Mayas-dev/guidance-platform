@@ -289,64 +289,85 @@ def received_offers(request, request_id):
 @login_required
 @require_POST
 def respond_to_offer(request, request_id, offer_id):
-    guidance_request = get_object_or_404(
-        GuidanceRequest,
-        pk=request_id,
-        user=request.user,
-    )
 
-    offer = get_object_or_404(
-        GuidanceOffer,
-        pk=offer_id,
-        guidance_request=guidance_request,
-    )
+    try:
+        with transaction.atomic():
 
-    if guidance_request.status != GuidanceRequest.Status.OPEN:
+            # Lock the parent request first.
+            guidance_request = get_object_or_404(
+                GuidanceRequest.objects.select_for_update(),
+                pk=request_id,
+                user=request.user,
+            )
+
+            # Retrieve the selected offer after acquiring the lock.
+            offer = get_object_or_404(
+                GuidanceOffer,
+                pk=offer_id,
+                guidance_request=guidance_request,
+            )
+
+            # Validate the current database state.
+            if guidance_request.status != GuidanceRequest.Status.OPEN:
+                messages.error(
+                    request,
+                    "This request is no longer open for decisions.",
+                )
+                return redirect(
+                    "received_offers",
+                    request_id=request_id,
+                )
+
+            if offer.status != GuidanceOffer.Status.PENDING:
+                messages.error(
+                    request,
+                    "This offer has already been processed.",
+                )
+                return redirect(
+                    "received_offers",
+                    request_id=request_id,
+                )
+
+            action = request.POST.get("action")
+
+            if action == "accept":
+
+                offer.status = GuidanceOffer.Status.ACCEPTED
+                offer.save(update_fields=["status"])
+
+                guidance_request.status = GuidanceRequest.Status.IN_PROGRESS
+                guidance_request.save(update_fields=["status"])
+
+                # Decline all remaining pending offers.
+                GuidanceOffer.objects.filter(
+                    guidance_request=guidance_request,
+                    status=GuidanceOffer.Status.PENDING,
+                ).exclude(
+                    pk=offer.pk
+                ).update(
+                    status=GuidanceOffer.Status.DECLINED
+                )
+
+                messages.success(
+                    request,
+                    "Offer accepted. The request is now in progress.",
+                )
+
+            elif action == "decline":
+
+                offer.status = GuidanceOffer.Status.DECLINED
+                offer.save(update_fields=["status"])
+
+                messages.success(request, "Offer declined.")
+
+            else:
+                messages.error(request, "Invalid action.")
+
+    except IntegrityError:
         messages.error(
             request,
-            "This request is no longer open for decisions.",
+            "The operation could not be completed because of a database conflict.",
         )
-        return redirect(
-            "received_offers",
-            request_id=request_id,
-        )
-
-    if offer.status != GuidanceOffer.Status.PENDING:
-        messages.error(
-            request,
-            "This offer has already been processed.",
-        )
-        return redirect(
-            "received_offers",
-            request_id=request_id,
-        )
-
-    action = request.POST.get("action")
-
-    if action == "accept":
-        offer.status = GuidanceOffer.Status.ACCEPTED
-        offer.save(update_fields=["status"])
-
-        guidance_request.status = GuidanceRequest.Status.IN_PROGRESS
-        guidance_request.save(update_fields=["status"])
-
-        GuidanceOffer.objects.filter(
-            guidance_request=guidance_request,
-            status=GuidanceOffer.Status.PENDING,
-        ).exclude(pk=offer.pk).update(
-            status=GuidanceOffer.Status.DECLINED
-        )
-
-        messages.success(request, "Offer accepted. The request is now in progress.")
-
-    elif action == "decline":
-        offer.status = GuidanceOffer.Status.DECLINED
-        offer.save(update_fields=["status"])
-
-        messages.success(request, "Offer declined.")
-
-    else:
-        messages.error(request, "Invalid action.")
 
     return redirect("received_offers", request_id=request_id)
 
